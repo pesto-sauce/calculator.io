@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<body style="background-color: #ABABAB; font-size: x-large; font-family: 'Courier New';">
+<style>
+    button {
+        padding: 25px 0px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: x-large;
+        min-height: 75px !important;
+        min-width: 100px !important;
+        background-color: #606060;
+        color: #E1E1E1;
+    }
+
+</style>
+
+<title>Calculator</title>
+<script>
+    let x = undefined // the number on the display
+    let y = undefined // acts as the calculator's memory
+    let calc_mode = undefined // defines the operation to be processed
+    let display_mode = false // indicates if the number on display should be added to or written over
+    let max_length = 12 // the highest length supported in the display without stretching
+
+
+    function display_write(n) {
+        if (display_mode == true) {
+            display_mode = false;
+            if (x != undefined && parseFloat(x) != NaN) {
+                y = parseFloat(x);
+            }
+            x = undefined;
+        }
+        if (x == undefined) {
+            x = ""
+        }
+
+        if (n == '.') {
+            if (x.includes('.')) {
+                return
+            }
+        }
+
+        if (x.length < max_length) {
+            x += n;
+        }
+        process()
+    }
+    function clear_all() {
+        calc_mode = undefined;
+        y = undefined;
+        display_mode = false;
+        x = undefined;
+        process()
+    }
+    function clear_one() { 
+        if (parseFloat(x) == NaN || display_mode == true) {
+            clear_all()
+            return
+        }
+        let in_num = document.getElementById("display").innerHTML;
+        let out_num = in_num.slice(0, in_num.length - 1);
+        document.getElementById("display").innerHTML = out_num;
+        x = out_num;
+        if (x == "") {
+            x = undefined;
+        }
+        process()
+    }
+    function calc_gen(operation) {
+        if (x == undefined) { return }
+        if (display_mode == true) {
+            display_mode = false;
+        }
+        if (y == undefined && parseFloat(x) != NaN) {
+            y = parseFloat(x);
+            x = undefined
+            calc_mode = operation;
+            display_mode = true
+        } else {
+            result();
+            calc_mode = operation;
+        }
+        process()
+    }
+    function calc_square() {
+        if (x == undefined) { return }
+        x = x * x;
+
+        process()
+    }
+    function calc_sqrt() {
+        if (x == undefined) { return }
+        x = Math.sqrt(x)
+        process()
+    }
+    function result() {
+        if (calc_mode == undefined || x == undefined || y == undefined) { return } 
+
+        x = parseFloat(x)
+        y = parseFloat(y)
+        if (calc_mode == "add") {
+            x = y + x;
+        } else if (calc_mode == "sub") {
+            x = y - x;
+        } else if (calc_mode == "mul") {
+            x = y * x;
+        } else if (calc_mode == "div") {
+            x = y / x;
+        }
+
+        display_mode = true;
+        y = undefined
+        calc_mode = undefined
+        process()
+    }
+    function process() {
+        // manage display
+        if (x != undefined) {
+            document.getElementById("display").innerHTML = x;
+        } else {
+            document.getElementById("display").innerHTML = "";
+        }
+
+
+        // manage the length of the display
+        let n = document.getElementById("display").innerHTML
+        if (n.length > max_length) {
+            while (n.length > max_length - 2) {
+                let in_num = n;
+                let out_num = in_num.slice(0, in_num.length - 1);
+                n = out_num
+            }
+            document.getElementById("display").innerHTML = n + ".."
+        }
+
+        // manage button colors
+        document.getElementById("btn_add").style.backgroundColor = "#606060"
+        document.getElementById("btn_sub").style.backgroundColor = "#606060"
+        document.getElementById("btn_mul").style.backgroundColor = "#606060"
+        document.getElementById("btn_div").style.backgroundColor = "#606060"
+
+        if (calc_mode == "add") {
+            document.getElementById("btn_add").style.backgroundColor = "#DD7040"
+        } else if (calc_mode == "sub") {
+            document.getElementById("btn_sub").style.backgroundColor = "#DD7040"
+        } else if (calc_mode == "mul") {
+            document.getElementById("btn_mul").style.backgroundColor = "#DD7040"
+        } else if (calc_mode == "div") {
+            document.getElementById("btn_div").style.backgroundColor = "#DD7040"
+        } 
+
+        // manage dev displays
+        //document.getElementById("dev_x").innerHTML = "number: " + x;
+        //document.getElementById("dev_y").innerHTML = "memory: " + y;
+        //document.getElementById("dev_mode").innerHTML = "mode: " + calc_mode;
+        //document.getElementById("dev_display_mode").innerHTML = "display mode: " + display_mode;
+        //document.getElementById("dev_length").innerHTML = "length: " + document.getElementById("display").innerHTML.length 
+    }
+</script>
+
+
+<h1 align="center">Calculator</h1>
+
+<table align="center" border="40" style="border-style: outset; background-color: black; border-radius: 20px;">
+    <tr>
+        <td id="display" colspan="4" style="text-align: right; height: 120px; font-size: 58px; background-color: #607060;"></td>
+    </tr>
+
+    <tr>
+        <td><button onclick="calc_square()">x<sup style="font-size: small;">2</sup></button></td>
+        <td><button onclick="calc_sqrt()">sqrt</button></td>
+        <td><button onclick="clear_one()">C</button></td>
+        <td><button onclick="clear_all()">CE</button></td>
+    </tr>
+    <tr>
+        <td><button onclick="display_write('1')">1</button></td>
+        <td><button onclick="display_write('2')">2</button></td>
+        <td><button onclick="display_write('3')">3</button></td>
+        <td><button onclick="calc_gen('add')" id="btn_add">+</button></td>
+    </tr>
+    <tr>
+        <td><button onclick="display_write('4')">4</button></td>
+        <td><button onclick="display_write('5')">5</button></td>
+        <td><button onclick="display_write('6')">6</button></td>
+        <td><button onclick="calc_gen('sub')" id="btn_sub">-</button></td>
+    </tr>
+    <tr>
+        <td><button onclick="display_write('7')">7</button></td>
+        <td><button onclick="display_write('8')">8</button></td>
+        <td><button onclick="display_write('9')">9</button></td>
+        <td><button onclick="calc_gen('mul')" id="btn_mul">*</button></td>
+    </tr>
+    <tr>
+        <td><button onclick="display_write('.')">.</button></td>
+        <td><button onclick="display_write('0')">0</button></td>
+        <td><button onclick="result()">=</button></td>
+        <td><button onclick="calc_gen('div')" id="btn_div">/</button></td>
+    </tr>
+</table>
+
+<p align="center" id="warn"></p>
+
+<p align="center" id="dev_x"></p>
+<p align="center" id="dev_y"></p>
+<p align="center" id="dev_mode"></p>
+<p align="center" id="dev_display_mode"></p>
+<p align="center" id="dev_length"></p>
+
+
+
+
+</body>
+</html>
